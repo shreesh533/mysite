@@ -1,0 +1,14 @@
+
+1. Can you write a SQL query to output employee names that are occuring more than once 
+based on below data and how many times each name has occured from a table named employees.
+
+Select 
+EmployeeName , count(EmployeeName) as same_employee_count
+form employees
+group by EmployeeName
+HAVING same_employee_count > 1
+
+
+2. Write an SQL query to find the third highest salary from a table named `employees`.
+
+select * from employees order by Salary DESC limit 1 offset 2

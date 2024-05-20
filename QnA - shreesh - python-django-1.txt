@@ -1,0 +1,71 @@
+# 1. **Write a Django view that reads data from a log file server.log, 
+# filters out lines that contain the keyword "ERROR", and writes only the error lines to a new file errors.log. 
+# Ensure your solution efficiently handles large files without loading the entire file into memory 
+# and processes each line individually.**
+
+
+# Open the server.log file in read mode and check the lines if they contain "ERROR" in their logs:
+# Keep appending it to the list if it does contain
+with openfile("server.log", r) as file:
+    error_logs = []
+    for line in file:
+        if "ERROR" in line:
+            error_logs.append(line)
+
+# Close the server.log file and if there are any logs present in the list, add these to the new file: errors.log
+if error_logs:
+    with openfile("errors.log", w) as error_file:
+        for error_log in error_logs:
+            error_file.add(error_log)
+    
+
+================================================================================================================================================
+# 2. **Imagine you are developing a feature in a web application where the user can upload a file, and the following tasks need to be performed:**
+# Upload the file to the server.
+# Process the file on the server, which involves multiple asynchronous steps internally.
+# Fetch the result of the processing and display it to the user.
+# You have to implement this functionality using both `concurrent.futures` and `asyncio`. Write a code-snippet for the same.
+
+
+
+class UploadFile(GenericAPIViews):
+    
+    def post(self, request):
+        file_processing_state = "Uploadin "
+        file_object = request.FILES.get("file_key")
+        s3_object = s3_handler.upload(file_object)
+        
+    def get(self, request):
+        pass
+
+================================================================================================================================================
+# 3. Write a Python function that takes a nested dictionary as an input and returns a flattened dictionary with all the nested properties.
+
+
+input_dict = {
+  'a': 1,
+  'b': {
+    'c': 2,
+    'd': {
+      'e': 3
+    }
+  }
+}
+output_dict = {}
+
+
+def check_key_value(current_dict):
+    # iterate through the dict with the key and value:
+    
+    for key, value in current_dict.items():
+        print(key, value)
+        print(type(value))
+        # If the value is again a dict, then recursively try to find the key and values in the current value: 
+        if type(value) == dict:
+            check_key_value(value)
+        # If the value is anything but a dict, we would add it to the output_dict.
+        else:
+            output_dict[key] = value
+
+check_key_value(input_dict)
+
