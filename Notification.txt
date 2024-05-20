@@ -1,0 +1,79 @@
+* Notification Processing and Delivery System *
+
+Part A: Procesing the message + Transformation + Filtering
+    1. Process the message - Basic validations (Phone number validity), subject and message validations
+    2. Log the messaage
+
+Part B: Message Delivery Consumer
+    1. Pick the message from the kafka topic
+    2. Check the phone number and content
+    3. Check cache if the same message for the same phone numer exists. 
+    4. Deliver the message
+
+Notification Request Module:
+    A component which would send the notification requests to the Notification processor
+    This request would have the notification payload. Example of the notification payload:
+    
+    notification_message_payload = {
+        "sender_details": {
+            "name": "PayNow",
+            "created_at": "2024-05-01 00:00:00",
+        },
+        "reveiver_details": {
+            "reveiver_id": 9535683842,
+            "phone": 8660439664,
+        },
+        "content": {
+            "subject": "Pay your bills now",
+            "message": "Hey, your bill of 100 is pending! Pay now",
+            "logo_url": "s3-link-to-logo"
+            "category": "payment"
+        }
+        
+    }
+
+
+Notification Producer:
+    A machine which receives and processes the notification requests.
+
+    The request received from the notification request module would have the content. 
+    This would be transfored by the notification processor according to the format which receiver would understand.
+
+    This machine would hit the database and get more information about the receiver and populate the payload.
+    Logging of the notification would also take place here. 
+
+    The machine here would be aware of the queue topic where it would publish the notification message.
+    
+
+Notification Queue:
+    A kafka queue would be required to have all the notification in place. 
+    Kafka is recommended for it's high availability, horizantal scaling and fault taulerence 
+
+    The consumer of this topic would be responsible to send the notification to the user
+
+
+Message Delivery Consumer:
+    Kafka consumer which would pick the notification message
+        It would check the cache if the message and the phone number are present in the cache and not expired.
+        If such message exist in the cache, it would mean that current request is duplicate
+        
+
+Cache:
+    Use REDIS prefarably for it's persistant storage. 
+    The message and phone number would be cached for a specific time period. 
+    Any new message received will be looked up in cache for duplication check of phone and message
+
+    
+Why the cache check should happen in the consumer ?
+    In case of breakdown, even if we replay any number of kafka messgaes again within the cache expiry time, 
+    we would not be sending the duplicate message again.
+
+
+Error Handling
+
+    Any errors encountered on notification processing and transforming would be logged.
+    The workers processing the notification message delivery would have a retry mechanism 
+
+
+Retry Mechanism 
+    Any failure in delivery of the notification can be retried from kafka by setting the retry and Deadletter queues 
